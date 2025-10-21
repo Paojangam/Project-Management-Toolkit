@@ -1,0 +1,86 @@
+:root{
+  --sidebar-width: 260px;
+  --topbar-height: 64px; /* match your navbar height */
+  --gap: 16px;
+}
+
+/* Grid: header on top, sidebar + main below */
+.app-grid {
+  display: grid;
+  grid-template-rows: var(--topbar-height) 1fr;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-areas:
+    "topbar topbar"
+    "sidebar main";
+  height: 100vh;
+  overflow: hidden; /* main-area will scroll */
+}
+
+/* When sidebar is hidden collapse that column */
+.app-grid.no-sidebar {
+  grid-template-columns: 0 1fr;
+}
+
+/* Layout areas */
+.topbar {
+  grid-area: topbar;
+  height: var(--topbar-height);
+  box-sizing: border-box;
+  border-bottom: 1px solid #e6e8eb;
+  background: var(--topbar-bg, #fff);
+  z-index: 30;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  background: var(--sidebar-bg, #f6f7f9);
+  border-right: 1px solid #e6e8eb;
+  padding: 12px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  transition: transform .18s ease, width .18s ease, opacity .18s ease;
+}
+
+/* collapsed visually and interactively */
+.sidebar.collapsed {
+  width: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* main content area; this scrolls */
+.main-area {
+  grid-area: main;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: var(--content-bg, #fff);
+}
+
+/* mobile behaviour: slide-in sidebar */
+@media (max-width: 900px) {
+  .app-grid {
+    grid-template-columns: 0 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: var(--topbar-height);
+    height: calc(100vh - var(--topbar-height));
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+    z-index: 60;
+  }
+
+  /* when .with-sidebar is toggled, slide in */
+  .app-grid.with-sidebar .sidebar {
+    transform: translateX(0);
+  }
+
+  /* ensure main-area is above background layers */
+  .main-area {
+    z-index: 10;
+  }
+}

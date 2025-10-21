@@ -1,0 +1,34 @@
+.auth-card {
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 32px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: var(--card);
+}
+
+.auth-card h2 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.auth-card .err {
+  background: #ffecec;
+  color: #b00;
+  padding: 10px;
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+}
+
+.auth-card .info {
+  background: #eef7ff;
+  color: #035;
+  padding: 10px;
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+}
+
+.auth-card button {
+  width: 100%;
+  margin-top: 10px;
+}

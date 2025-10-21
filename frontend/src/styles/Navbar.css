@@ -1,0 +1,167 @@
+:root {
+  --bg: #ffffff;
+  --muted: #f6f8fb;
+  --text: #0f1724;
+  --blue: #2f6ff7;
+  --purple: #e9d9ff;
+  --pill-shadow: 0 6px 18px rgba(47, 111, 247, 0.12);
+
+  --container-padding: 16px;
+  --nav-height: 52px;  /* navbar height */
+  --nav-gap: 1px;     /* space between navbar and page */
+  
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #fbfdff 0%, #ffffff 100%);
+}
+
+/* Navbar wrapper */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--container-padding);
+  border-bottom: 1px solid #f0f3f6;
+  gap: 16px;
+  background: var(--bg);
+  z-index: 1000;
+}
+
+/* Left section */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.logo .mark {
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(135deg, #2f6ff7, #3aa0ff);
+  transform: rotate(45deg);
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03) inset;
+}
+
+.logo .title {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+  letter-spacing: 0.1px;
+}
+.nav-left {
+  margin-right: auto; /* pushes everything else to the right */
+}
+
+.logo {
+  justify-content: flex-start;
+}
+
+
+/* Search input */
+.search {
+  min-width: 300px;
+  max-width: 600px;
+  width: 35vw;
+}
+
+.search input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #eef3f8;
+  background: var(--muted);
+  outline: none;
+  font-size: 13px;
+}
+
+.search input::placeholder {
+  color: #9aa6b3;
+}
+
+/* Right section */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  color: #2f6ff7;
+}
+
+.btn-create {
+  background: var(--blue);
+  color: #366dbb;
+  box-shadow: var(--pill-shadow);
+}
+
+.btn-upgrade {
+  background: linear-gradient(180deg, #f3e8ff, #f7efff);
+  color: #6b2aa8;
+  border: 1px solid rgba(107, 42, 168, 0.08);
+  font-weight: 600;
+  padding: 6px 10px;
+}
+
+/* Avatar */
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #3a9ff8, #2f6ff7);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 780px) {
+  .search {
+    display: none;
+  }
+  .logo .title {
+    display: none;
+  }
+  .btn-upgrade {
+    display: none;
+  }
+}
+
+/* Push page content below the navbar with extra gap */
+.projects-shell,
+.page-content,
+main {
+  padding-top: calc(var(--nav-height) + var(--nav-gap));
+  min-height: 100vh; /* so it always spans full screen height */
+}
