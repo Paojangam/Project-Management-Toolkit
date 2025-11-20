@@ -62,38 +62,67 @@ exports.getMe = asyncHandler(async (req, res) => {
 // ==================== GOOGLE LOGIN ====================
 exports.googleLogin = asyncHandler(async (req, res) => {
   const { token } = req.body;
-
-  if (!token) {
-    res.status(400);
-    throw new Error('Google token is required');
-  }
+  if (!token) return res.status(400).json({ ok: false, message: 'Google token is required' });
 
   try {
-    // Verify the token with Google
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID
     });
 
     const payload = ticket.getPayload();
-    const { sub, email, name, picture } = payload;
+    console.log('Google payload:', payload);
 
-    // Check if user already exists
-    let user = await User.findOne({ email });
-    if (!user) {
-      // Create new user if not exists
-      user = await User.create({
-        name,
-        email,
-        password: Math.random().toString(36).slice(-8), // random password
-        role: 'user',
-        googleId: sub,
-        picture
-      });
+    if (!payload || !payload.email) {
+      return res.status(400).json({ ok: false, message: 'Google payload missing email' });
     }
 
-    // Send JWT
-    res.json({
+    const { sub: googleId, email, name: googleName, picture, email_verified } = payload;
+
+    // Prepare safe defaults to satisfy strict schemas
+    const fallbackName = googleName || email.split('@')[0];
+    const randomPassword = Math.random().toString(36).slice(-12); // secure enough for generated password
+    const defaultRole = 'user';
+
+    // Try to find existing user by email first
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // If user exists but doesn't have googleId stored, attach it
+      if (!user.googleId || user.googleId !== googleId) {
+        user.googleId = googleId;
+        if (picture && !user.picture) user.picture = picture;
+        await user.save();
+      }
+    } else {
+      // Use upsert to avoid race conditions and validation issues:
+      user = await User.findOneAndUpdate(
+        { email },
+        {
+          $setOnInsert: {
+            name: fallbackName,
+            email,
+            password: randomPassword,
+            role: defaultRole,
+            googleId,
+            picture,
+            emailVerified: !!email_verified
+          }
+        },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true
+        }
+      );
+    }
+
+    // Final safety: ensure we have a user document
+    if (!user) {
+      return res.status(500).json({ ok: false, message: 'Failed to find or create user' });
+    }
+
+    return res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
@@ -101,8 +130,8 @@ exports.googleLogin = asyncHandler(async (req, res) => {
       token: generateToken(user._id)
     });
   } catch (error) {
-    console.log(error);
-    res.status(401);
-    throw new Error('Invalid Google token');
+    console.error('Google login error:', error);
+    // Expose error.message temporarily while debugging; remove or sanitize in prod
+    return res.status(401).json({ ok: false, message: 'Google authentication failed', error: error.message });
   }
 });

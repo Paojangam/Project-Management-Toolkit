@@ -39,3 +39,15 @@
   color: #666;
   font-weight: 500;
 }
+.google-btn-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+/* Force the iframe (Google renders an iframe internally) to expand */
+.google-btn-wrap iframe {
+  width: 100% !important;
+  border-radius: 6px !important;
+}

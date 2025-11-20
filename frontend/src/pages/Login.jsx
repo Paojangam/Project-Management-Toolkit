@@ -83,11 +83,16 @@ function Login({ onLoginSuccess }) {
       <div className="auth-divider">OR</div>
 
       {/* Google Sign-In button */}
-      <GoogleLogin
-        onSuccess={handleGoogleResponse}
-        onError={() => setErr('Google login failed')}
-        size="large"
-      />
+      <div className="google-btn-wrap">
+  <GoogleLogin
+    onSuccess={handleGoogleResponse}
+    onError={() => setErr('Google login failed')}
+    theme="outline"
+    shape="rectangular"
+    width="100%"
+  />
+</div>
+
 
       <p>
         No account?{' '}
