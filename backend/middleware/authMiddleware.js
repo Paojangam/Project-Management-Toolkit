@@ -1,4 +1,3 @@
-// backend/middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
@@ -6,14 +5,17 @@ const User = require('../models/User');
 exports.protect = asyncHandler(async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization || req.headers.Authorization;
-    console.log('authHeader raw:', authHeader);
+    
+    // Only log in development mode for security
+    if (process.env.NODE_ENV === 'development') {
+      console.log('authHeader raw:', authHeader);
+    }
 
     if (!authHeader) {
       res.status(401);
       throw new Error('Not authorized, token missing');
     }
 
-    // tolerate "Bearer token" or "bearer token" or extra spaces
     const parts = authHeader.split(' ').filter(Boolean);
     if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
       res.status(401);
@@ -50,7 +52,6 @@ exports.protect = asyncHandler(async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    // let the error middleware send JSON; just rethrow
     throw err;
   }
 });

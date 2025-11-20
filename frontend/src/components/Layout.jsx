@@ -1,4 +1,3 @@
-// src/components/Layout.jsx
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
@@ -8,7 +7,6 @@ import "../styles/layout.css";
 export default function Layout({ user, onLogout }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // auto-collapse on small screens initially
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 900px)");
     setSidebarOpen(!mq.matches);

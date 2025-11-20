@@ -1,52 +1,54 @@
-// src/components/Navbar.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import "../styles/Navbar.css";
 import CreateProjectModal from "./CreateProjectModal";
+import ProfileSidebar from "./ProfileSidebar";
 import { api } from "../api";
 
 export default function Navbar({ user, onNavigate = () => {}, onLogout = () => {} }) {
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [showSidebar, setShowSidebar] = useState(false);
 
   async function handleCreate(payload) {
     setCreateError("");
     setCreating(true);
     try {
       const created = await api.projects.create(payload);
-      // close the modal
       setShowCreate(false);
 
-      // navigate to the created project if backend returned an id
       const id = created?.id || created?._id;
       if (id) {
-        // if your app expects a route name, you can adapt; here we try both
         onNavigate("project", { id });
       }
 
       return created;
     } catch (err) {
       setCreateError(err?.message || "Failed to create project");
-      // rethrow so modal can also show errors if it expects exceptions
       throw err;
     } finally {
       setCreating(false);
     }
   }
 
-  // Close modal on Escape key (but only when modal is open)
   const handleKeyDown = useCallback(
     (e) => {
-      if (!showCreate) return;
-      if (e.key === "Escape" || e.key === "Esc") {
-        // don't close while creating
-        if (!creating) {
-          setShowCreate(false);
-          setCreateError("");
+      if (showCreate) {
+        if (e.key === "Escape" || e.key === "Esc") {
+          if (!creating) {
+            setShowCreate(false);
+            setCreateError("");
+          }
+        }
+      }
+
+      if (showSidebar) {
+        if (e.key === "Escape" || e.key === "Esc") {
+          setShowSidebar(false);
         }
       }
     },
-    [showCreate, creating]
+    [showCreate, creating, showSidebar]
   );
 
   useEffect(() => {
@@ -54,10 +56,6 @@ export default function Navbar({ user, onNavigate = () => {}, onLogout = () => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // clicking the invisible backdrop will close the modal.
-  // the <div className="create-modal-catcher"> is intentionally minimal:
-  // it does not change your modal's look because it has no visual styles here.
-  // If you later want a dim background, add styles to that class in your CSS.
   return (
     <>
       <nav className="navbar">
@@ -73,10 +71,6 @@ export default function Navbar({ user, onNavigate = () => {}, onLogout = () => {
             <div className="mark" aria-hidden="true"></div>
             <div className="title">PM Tool</div>
           </div>
-
-          <div className="search" role="search">
-            <input type="search" placeholder="Search" aria-label="Search" />
-          </div>
         </div>
 
         <div className="nav-right">
@@ -91,14 +85,17 @@ export default function Navbar({ user, onNavigate = () => {}, onLogout = () => {
             + Create
           </button>
 
-          <button className="btn btn-upgrade" onClick={() => onNavigate("plans")}>Upgrade</button>
-
           {user ? (
             <>
-              <div className="avatar" title={user.name || user.email} onClick={() => onNavigate("profile")}>
+              <button
+                className="avatar avatar-btn"
+                title={user.name || user.email}
+                onClick={() => setShowSidebar(true)}
+                aria-haspopup="dialog"
+                aria-expanded={showSidebar}
+              >
                 {(user.name || user.email || "PK")[0].toUpperCase()}
-              </div>
-              <button className="btn" onClick={onLogout}>Logout</button>
+              </button>
             </>
           ) : (
             <>
@@ -108,17 +105,10 @@ export default function Navbar({ user, onNavigate = () => {}, onLogout = () => {
         </div>
       </nav>
 
-      {/* Modal: we render a click-catcher behind it which listens for outside clicks.
-          We intentionally don't change any look or styles in your modal component.
-          The catcher is non-visual by default (no background) so your appearance stays identical.
-          If you prefer a dim overlay later, add CSS rules for .create-modal-catcher to style it. */}
       {showCreate && (
         <div
-          // this wrapper catches clicks outside the modal content.
-          // We keep styles out of this file to avoid changing appearance.
           className="create-modal-catcher"
           onClick={(e) => {
-            // only trigger when user clicks on the catcher itself (outside the modal)
             if (e.target === e.currentTarget) {
               if (!creating) {
                 setShowCreate(false);
@@ -148,12 +138,19 @@ export default function Navbar({ user, onNavigate = () => {}, onLogout = () => {
         </div>
       )}
 
-      {/* Optional inline error display if create fails */}
-      {createError && (
-        <div style={{ position: "fixed", right: 20, bottom: 20, background: "#fee2e2", padding: 10, borderRadius: 6, color: "#991b1b" }}>
-          {createError}
-        </div>
-      )}
+      {createError && <div className="error-toast">{createError}</div>}
+
+      {/* Profile Sidebar */}
+      <ProfileSidebar
+        open={showSidebar}
+        onClose={() => setShowSidebar(false)}
+        user={user}
+        onNavigate={onNavigate}
+        onLogout={() => {
+          setShowSidebar(false);
+          onLogout();
+        }}
+      />
     </>
   );
 }

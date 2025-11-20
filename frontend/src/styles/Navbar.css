@@ -158,6 +158,19 @@ body {
   }
 }
 
+/* Error toast */
+.error-toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  background: #fee2e2;
+  padding: 10px;
+  border-radius: 6px;
+  color: #991b1b;
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
 /* Push page content below the navbar with extra gap */
 .projects-shell,
 .page-content,

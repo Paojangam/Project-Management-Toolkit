@@ -7,7 +7,7 @@ const projectSchema = new mongoose.Schema({
   endDate: { type: Date },
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  status: { type: String, default: 'active' } // active | archived
+  status: { type: String, default: 'active' } 
 }, { timestamps: true });
 
 module.exports = mongoose.model('Project', projectSchema);

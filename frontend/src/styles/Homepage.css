@@ -158,8 +158,15 @@
 /* right side of tile */
 .tile-right { display:flex; flex-direction:column; gap:8px; align-items:flex-end; justify-content:space-between; }
 .quick { font-size:13px; color: #9aa3b2; font-weight:700; }
-.links-list { display:flex; gap:8px; }
+.links-list { display:flex; flex-direction: column; gap:4px; }
 .links-list .link { background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:13px; }
+.links-list .link-info { color:var(--muted); font-size:12px; }
+
+.rp-footer {
+  padding: 12px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  text-align: center;
+}
 
 /* activities */
 .activities { margin-top: 18px; }

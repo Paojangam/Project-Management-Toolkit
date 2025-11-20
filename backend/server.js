@@ -34,7 +34,9 @@ const { Server } = require('socket.io');
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*' // restrict in prod to your frontend origin
+    origin: process.env.NODE_ENV === 'production' 
+      ? process.env.FRONTEND_URL || 'http://localhost:3000'
+      : '*'
   }
 });
 

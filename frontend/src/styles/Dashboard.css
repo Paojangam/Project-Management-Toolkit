@@ -140,8 +140,20 @@
 .status-bar span {
   display: block;
   height: 100%;
-  width: var(--pct, 50%);
+  width: 100%;
   background: linear-gradient(90deg,#34d399,#60a5fa);
+}
+
+.status-bar-70 span {
+  width: 70%;
+}
+
+.status-bar-75 span {
+  width: 75%;
+}
+
+.status-bar-85 span {
+  width: 85%;
 }
 
 /* positive difference */

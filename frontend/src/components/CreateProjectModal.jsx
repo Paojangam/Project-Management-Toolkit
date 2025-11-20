@@ -45,28 +45,22 @@ export default function CreateProjectModal({ open, onClose, onCreate }) {
     setCreating(true);
 
     try {
-      // CALL the API directly (this is the main change)
       const created = await api.projects.create(payload);
 
-      // If parent wants to do something additional with created project, call the callback.
       if (typeof onCreate === "function") {
         try {
-          // parent may expect onCreate to throw on error; tolerate either way
           await onCreate(created);
         } catch (parentErr) {
-          // parent signaled an error handling the created project; show message but keep created state
           setErr(parentErr?.message || "Parent handler failed");
           setCreating(false);
           return;
         }
       }
 
-      // reset form and close modal (appearance unchanged)
       setForm({ title: "", description: "", startDate: "", endDate: "", members: "" });
       setCreating(false);
       onClose();
     } catch (e) {
-      // display server or network errors
       setErr(e?.message || "Failed to create project");
       setCreating(false);
     }
@@ -140,15 +134,16 @@ export default function CreateProjectModal({ open, onClose, onCreate }) {
           </label>
 
           <label>
-            Members (comma-separated emails)
+            Members (comma-separated user IDs)
             <input
               type="text"
               name="members"
               value={form.members}
               onChange={handleChange}
-              placeholder="alice@mail.com, bob@mail.com"
+              placeholder="507f1f77bcf86cd799439011, 507f191e810c19729de860ea"
               disabled={creating}
             />
+            <small className="field-hint">Enter MongoDB ObjectIds of users to add as members</small>
           </label>
 
           {err && <div className="error" role="alert">{err}</div>}

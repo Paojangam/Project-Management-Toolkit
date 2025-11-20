@@ -16,8 +16,6 @@ export default function Sidebar({ selected, setSelected }) {
   const navigate = useNavigate();
   const items = [
     { key: "for-you", label: "For you", icon: "🏷", route: "homepage" },
-    { key: "recent", label: "Recent", icon: "🕘", route: "recent" },
-    { key: "starred", label: "Starred", icon: "⭐", route: "starred" },
     { key: "apps", label: "Apps", icon: "◼", route: "apps" },
     { key: "projects", label: "Projects", icon: "🗂", route: "projects" },
     { key: "dashboards", label: "Dashboards", icon: "📊", route: "dashboard" },
@@ -43,8 +41,7 @@ export default function Sidebar({ selected, setSelected }) {
         role="button"
         tabIndex={0}
       >
-        <div className="brand-icon">🔷</div>
-        <div className="brand-name">PM Tool</div>
+        
       </div>
 
       <nav className="nav-list">

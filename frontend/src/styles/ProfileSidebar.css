@@ -1,0 +1,138 @@
+/* ProfileSidebar.css */
+/* Blue + white theme, subtle shadows, slide-in panel */
+
+/* overlay that catches clicks */
+.ps-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200; /* high so it's above modals */
+    background: rgba(0, 0, 0, 0.15);
+    display: flex;
+    justify-content: flex-end; /* panel slides from right */
+    align-items: stretch;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* the panel itself */
+  .ps-panel {
+    width: 320px;
+    max-width: 90%;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    box-shadow: -12px 0 30px rgba(15, 35, 65, 0.12);
+    border-left: 1px solid rgba(20, 60, 120, 0.06);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(0);
+    transition: transform 220ms cubic-bezier(.2,.9,.2,1);
+    outline: none;
+  }
+  
+  /* header with avatar + name */
+  .ps-header {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(10, 40, 90, 0.04);
+    margin-bottom: 12px;
+  }
+  
+  .ps-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2b6ef6, #1e90ff);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(45, 100, 255, 0.12);
+  }
+  
+  .ps-user {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  
+  .ps-name {
+    font-weight: 600;
+    color: #0b2a66;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .ps-email {
+    font-size: 13px;
+    color: #5b6b8b;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* nav items */
+  .ps-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  
+  .ps-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 15px;
+    color: #0b2a66;
+    transition: background 120ms ease, transform 80ms ease;
+  }
+  
+  .ps-item:hover {
+    background: rgba(30, 120, 255, 0.06);
+    transform: translateY(-1px);
+  }
+  
+  .ps-item:active {
+    transform: translateY(0);
+  }
+  
+  .ps-icon {
+    width: 20px;
+    height: 20px;
+    fill: #0b2a66;
+    flex: 0 0 20px;
+  }
+  
+  /* danger (logout) */
+  .ps-danger {
+    color: #d14343;
+  }
+  
+  .ps-danger .ps-icon {
+    fill: #d14343;
+  }
+  
+  /* small divider between groups */
+  .ps-divider {
+    height: 1px;
+    background: rgba(10, 40, 90, 0.03);
+    margin: 6px 0;
+  }
+  
+  /* responsiveness */
+  @media (max-width: 520px) {
+    .ps-panel {
+      width: 90%;
+    }
+  }
+  

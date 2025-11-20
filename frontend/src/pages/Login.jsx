@@ -2,13 +2,42 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import '../styles/Login.css';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
-export default function Login({ onLoginSuccess }) {
+export default function LoginWrapper({ onLoginSuccess }) {
+  // Wrap the Login component with GoogleOAuthProvider
+  return (
+    <GoogleOAuthProvider clientId="691950725329-gr2888rno78hu3k3n1j17j3dl1o66ush.apps.googleusercontent.com">
+      <Login onLoginSuccess={onLoginSuccess} />
+    </GoogleOAuthProvider>
+  );
+}
+
+function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const navigate = useNavigate();
 
+  // Google login callback
+  const handleGoogleResponse = async (credentialResponse) => {
+    try {
+      const token = credentialResponse.credential; // JWT from Google
+      const res = await api.auth.googleLogin(token);
+
+      const user = res;
+      const accessToken = res.token;
+
+      if (!accessToken) throw new Error('No token from server');
+
+      onLoginSuccess(user, accessToken);
+      navigate('/dashboard');
+    } catch (error) {
+      setErr(error.message || 'Google login failed');
+    }
+  };
+
+  // Normal email/password login
   async function submit(e) {
     e.preventDefault();
     setErr('');
@@ -20,7 +49,7 @@ export default function Login({ onLoginSuccess }) {
       if (!token) throw new Error('No token returned from server');
 
       onLoginSuccess(user, token);
-      navigate('/dashboard'); // or wherever you want after successful login
+      navigate('/dashboard');
     } catch (error) {
       setErr(error.message);
     }
@@ -30,9 +59,12 @@ export default function Login({ onLoginSuccess }) {
     <div className="card auth-card">
       <h2>Login</h2>
       {err && <div className="err">{err}</div>}
+
+      {/* Email/password login form */}
       <form onSubmit={submit}>
         <label>Email</label>
         <input
+          placeholder="example@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -44,12 +76,23 @@ export default function Login({ onLoginSuccess }) {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button className="primary" type="submit">Login</button>
+        <button className="primary" type="submit">Sign In</button>
       </form>
+
+      {/* Divider */}
+      <div className="auth-divider">OR</div>
+
+      {/* Google Sign-In button */}
+      <GoogleLogin
+        onSuccess={handleGoogleResponse}
+        onError={() => setErr('Google login failed')}
+        size="large"
+      />
+
       <p>
         No account?{' '}
         <button className="link-btn" onClick={() => navigate('/register')}>
-          Register
+          Sign Up
         </button>
       </p>
     </div>

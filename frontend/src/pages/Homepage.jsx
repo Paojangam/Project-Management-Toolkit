@@ -42,14 +42,13 @@ export default function Homepage({ user = null }) {
     };
   }, []);
 
-  // Only show 3 recent projects
   const recentProjects = useMemo(() => {
     if (!projects) return [];
     return projects.slice(0, 3);
   }, [projects]);
 
   function openProject(id) {
-    navigate(ROUTE_MAP.project(id));
+    navigate(`/projects/${id}`);
   }
 
   return (
@@ -68,7 +67,7 @@ export default function Homepage({ user = null }) {
                   href="#view"
                   onClick={(e) => {
                     e.preventDefault();
-                    navigate(ROUTE_MAP.projects);
+                    navigate('/projects');
                   }}
                 >
                   View all projects
@@ -87,41 +86,39 @@ export default function Homepage({ user = null }) {
                 {!loading.projects && !error.projects && (
                   <div className="rp-row">
                     {recentProjects.slice(0, 2).map((p) => (
-                      <div className="project-tile" key={p.id}>
+                      <div className="project-tile" key={p._id || p.id}>
                         <div className="tile-left">
                           <div className="badge" aria-hidden>
-                            🧭
+                            {(p.title || 'P').charAt(0).toUpperCase()}
                           </div>
                           <div className="tile-info">
-                            <div className="tile-name">{p.name || p.title}</div>
+                            <div className="tile-name">{p.title}</div>
                             <div className="tile-desc">
-                              {p.type || p.projectType || p.description}
+                              {p.description || 'No description'}
                             </div>
                           </div>
                         </div>
                         <div className="tile-right">
                           <div className="tile-links">
-                            <div className="quick">Quick links</div>
+                            <div className="quick">Project Info</div>
                             <div className="links-list">
-                              <button
-                                className="link"
-                                onClick={() => navigate(ROUTE_MAP.board(p.id, "open"))}
-                              >
-                                My open work items
-                              </button>
-                              <button
-                                className="link"
-                                onClick={() => navigate(ROUTE_MAP.board(p.id, "done"))}
-                              >
-                                Done work items
-                              </button>
+                              {p.owner && (
+                                <div className="link-info">
+                                  Owner: {typeof p.owner === 'object' ? (p.owner.name || p.owner.email) : 'Unknown'}
+                                </div>
+                              )}
+                              {p.members && p.members.length > 0 && (
+                                <div className="link-info">
+                                  Members: {p.members.length}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div className="open-row">
-                            <div className="boards">{p.boards ?? 0} board</div>
+                            <div className="boards">Status: {p.status || 'active'}</div>
                             <button
                               className="btn small"
-                              onClick={() => openProject(p.id)}
+                              onClick={() => navigate(`/projects/${p._id || p.id}`)}
                             >
                               Open
                             </button>
@@ -134,17 +131,10 @@ export default function Homepage({ user = null }) {
               </div>
 
               {projects && projects.length > 3 && (
-                <div
-                  className="rp-footer"
-                  style={{
-                    padding: "12px",
-                    borderTop: "1px solid rgba(0,0,0,0.06)",
-                    textAlign: "center",
-                  }}
-                >
+                <div className="rp-footer">
                   <button
                     className="btn ghost"
-                    onClick={() => navigate(ROUTE_MAP.projects)}
+                    onClick={() => navigate('/projects')}
                   >
                     View all projects
                   </button>

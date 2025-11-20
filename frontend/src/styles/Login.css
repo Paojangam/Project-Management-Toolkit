@@ -32,3 +32,10 @@
   width: 100%;
   margin-top: 10px;
 }
+
+.auth-divider {
+  text-align: center;
+  margin: 1rem 0;
+  color: #666;
+  font-weight: 500;
+}

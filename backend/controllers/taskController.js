@@ -1,14 +1,16 @@
-// backend/controllers/taskController.js
 const asyncHandler = require('express-async-handler');
 const mongoose = require('mongoose');
 const Task = require('../models/Task');
 const Project = require('../models/Project');
+const Comment = require('../models/Comment');
+const User = require('../models/User');
 const notify = require('../utils/notify');
 const Notification = require('../models/Notification');
 
-/**
- * Helper: emit via socket (if available)
- */
+const validStatuses = ['todo', 'inprogress', 'done'];
+const validPriorities = ['low', 'medium', 'high'];
+
+
 function emitToProject(req, projectId, event, payload) {
   try {
     const io = req.app.get('io');
@@ -26,17 +28,47 @@ function emitToUser(req, userId, event, payload) {
   }
 }
 
-/**
- * GET /api/tasks?project=<projectId>
- */
-// GET /api/tasks?project=&q=&status=&assignee=&priority=&dueBefore=&dueAfter=&page=&limit=
+
 exports.getTasks = asyncHandler(async (req, res) => {
   const { project, q, status, assignee, priority, dueBefore, dueAfter, page = 1, limit = 50 } = req.query;
   const filter = {};
-  if (project) filter.project = project;
-  if (status) filter.status = status;
-  if (assignee) filter.assignee = assignee;
-  if (priority) filter.priority = priority;
+  
+  // Validate and filter by project
+  if (project) {
+    if (!mongoose.isValidObjectId(project)) {
+      res.status(400);
+      throw new Error('Invalid project id format');
+    }
+    filter.project = project;
+  }
+  
+  // Validate and filter by status
+  if (status) {
+    if (!validStatuses.includes(status)) {
+      res.status(400);
+      throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+    }
+    filter.status = status;
+  }
+  
+  // Validate and filter by assignee
+  if (assignee) {
+    if (!mongoose.isValidObjectId(assignee)) {
+      res.status(400);
+      throw new Error('Invalid assignee id format');
+    }
+    filter.assignee = assignee;
+  }
+  
+  // Validate and filter by priority
+  if (priority) {
+    if (!validPriorities.includes(priority)) {
+      res.status(400);
+      throw new Error(`Invalid priority. Must be one of: ${validPriorities.join(', ')}`);
+    }
+    filter.priority = priority;
+  }
+  
   if (dueBefore || dueAfter) filter.dueDate = {};
   if (dueBefore) filter.dueDate.$lte = new Date(dueBefore);
   if (dueAfter) filter.dueDate.$gte = new Date(dueAfter);
@@ -48,11 +80,15 @@ exports.getTasks = asyncHandler(async (req, res) => {
     ];
   }
 
-  const skip = (parseInt(page)-1) * parseInt(limit);
+  // Validate and sanitize pagination
+  const pageNum = Math.max(1, parseInt(page) || 1);
+  const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 50));
+  const skip = (pageNum - 1) * limitNum;
+  
   const tasks = await Task.find(filter)
     .populate('assignee','name email')
     .populate('project','title owner members')
-    .skip(skip).limit(parseInt(limit)).sort({ dueDate: 1 });
+    .skip(skip).limit(limitNum).sort({ dueDate: 1 });
 
   const visible = tasks.filter(t => {
     const p = t.project;
@@ -85,25 +121,59 @@ exports.createTask = asyncHandler(async (req, res) => {
     req.user.role === 'admin';
   if (!isRelated) { res.status(403); throw new Error('Not allowed to create tasks in this project'); }
 
+  // Validate assignee if provided
+  let assigneeId = null;
+  if (assignee) {
+    if (!mongoose.isValidObjectId(assignee)) {
+      res.status(400);
+      throw new Error('Invalid assignee id format');
+    }
+    const assigneeUser = await User.findById(assignee);
+    if (!assigneeUser) {
+      res.status(404);
+      throw new Error('Assignee not found');
+    }
+    // Verify assignee is a project member or owner
+    const isMember = (proj.members || []).some(m => m.equals(assignee)) || 
+                     proj.owner.equals(assignee);
+    if (!isMember) {
+      res.status(403);
+      throw new Error('Assignee must be a project member or owner');
+    }
+    assigneeId = assignee;
+  }
+
+  // Validate status enum
+  const taskStatus = status || 'todo';
+  if (!validStatuses.includes(taskStatus)) {
+    res.status(400);
+    throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+  }
+
+  // Validate priority enum
+  const taskPriority = priority || 'medium';
+  if (!validPriorities.includes(taskPriority)) {
+    res.status(400);
+    throw new Error(`Invalid priority. Must be one of: ${validPriorities.join(', ')}`);
+  }
+
   const toCreate = {
     title,
     description: description || '',
     project,
-    assignee: assignee || null,
-    status: status || 'todo',
-    priority: priority || 'medium',
+    assignee: assigneeId,
+    status: taskStatus,
+    priority: taskPriority,
     dueDate: dueDate || null
   };
 
   const task = await Task.create(toCreate);
 
-  // populate for response and notifications
   const populated = await Task.findById(task._id)
     .populate('assignee', 'name email')
     .populate('project', 'title owner members')
     .lean();
 
-  // notify assignee if present
   if (populated.assignee) {
     await notify({
       req,
@@ -117,15 +187,12 @@ exports.createTask = asyncHandler(async (req, res) => {
     emitToUser(req, populated.assignee._id, 'notification', { type: 'task_assigned', task: populated });
   }
 
-  // emit to project room so connected clients update UI
   emitToProject(req, populated.project._id, 'taskCreated', populated);
 
   res.status(201).json(populated);
 });
 
-/**
- * GET /api/tasks/:id
- */
+
 exports.getTaskById = asyncHandler(async (req, res) => {
   const { id } = req.params;
   if (!mongoose.isValidObjectId(id)) { res.status(400); throw new Error('Invalid task id'); }
@@ -147,44 +214,79 @@ exports.getTaskById = asyncHandler(async (req, res) => {
   res.json(task);
 });
 
-/**
- * PUT /api/tasks/:id
- * Handles updates including status changes (Kanban)
- */
+
 exports.updateTask = asyncHandler(async (req, res) => {
   const { id } = req.params;
   if (!mongoose.isValidObjectId(id)) { res.status(400); throw new Error('Invalid task id'); }
 
-  // load with project and assignee (assignee might be id)
   const task = await Task.findById(id).populate('project', 'title owner members').populate('assignee', 'name email');
   if (!task) { res.status(404); throw new Error('Task not found'); }
 
-  // permission: assignee, project owner, project member, or admin
   const isAssignee = task.assignee && task.assignee._id ? task.assignee._id.equals(req.user._id) : (task.assignee && task.assignee.equals && task.assignee.equals(req.user._id));
   const isOwner = task.project && task.project.owner && task.project.owner.equals(req.user._id);
   const isMember = task.project && (task.project.members || []).some(m => m.equals(req.user._id));
   const canUpdate = isAssignee || isOwner || isMember || req.user.role === 'admin';
   if (!canUpdate) { res.status(403); throw new Error('Not allowed to update task'); }
 
-  // capture old values for notifications
   const oldStatus = task.status;
   const oldAssigneeId = task.assignee && task.assignee._id ? String(task.assignee._id) : (task.assignee ? String(task.assignee) : null);
 
-  // apply fields
-  const fields = ['title','description','assignee','status','priority','dueDate'];
-  fields.forEach(f => {
-    if (req.body[f] !== undefined) task[f] = req.body[f];
-  });
+  // Validate and update fields
+  if (req.body.title !== undefined) task.title = req.body.title;
+  if (req.body.description !== undefined) task.description = req.body.description;
+  
+  // Validate and update assignee
+  if (req.body.assignee !== undefined) {
+    if (req.body.assignee === null || req.body.assignee === '') {
+      task.assignee = null;
+    } else {
+      if (!mongoose.isValidObjectId(req.body.assignee)) {
+        res.status(400);
+        throw new Error('Invalid assignee id format');
+      }
+      const assigneeUser = await User.findById(req.body.assignee);
+      if (!assigneeUser) {
+        res.status(404);
+        throw new Error('Assignee not found');
+      }
+      // Verify assignee is a project member or owner
+      const isMember = (task.project.members || []).some(m => m.equals(req.body.assignee)) || 
+                       task.project.owner.equals(req.body.assignee);
+      if (!isMember) {
+        res.status(403);
+        throw new Error('Assignee must be a project member or owner');
+      }
+      task.assignee = req.body.assignee;
+    }
+  }
+  
+  // Validate and update status
+  if (req.body.status !== undefined) {
+    if (!validStatuses.includes(req.body.status)) {
+      res.status(400);
+      throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
+    }
+    task.status = req.body.status;
+  }
+  
+  // Validate and update priority
+  if (req.body.priority !== undefined) {
+    if (!validPriorities.includes(req.body.priority)) {
+      res.status(400);
+      throw new Error(`Invalid priority. Must be one of: ${validPriorities.join(', ')}`);
+    }
+    task.priority = req.body.priority;
+  }
+  
+  if (req.body.dueDate !== undefined) task.dueDate = req.body.dueDate;
 
   await task.save();
 
-  // re-populate for notifications/response
   const populated = await Task.findById(task._id)
     .populate('assignee', 'name email')
     .populate('project', 'title owner members')
     .lean();
 
-  // If assignee changed, notify new assignee
   const newAssigneeId = populated.assignee ? String(populated.assignee._id) : null;
   if (newAssigneeId && newAssigneeId !== oldAssigneeId) {
     await notify({
@@ -199,9 +301,7 @@ exports.updateTask = asyncHandler(async (req, res) => {
     emitToUser(req, newAssigneeId, 'notification', { type: 'task_assigned', task: populated });
   }
 
-  // If status changed, notify assignee and project owner
   if (req.body.status && req.body.status !== oldStatus) {
-    // notify current assignee (if exists)
     if (populated.assignee) {
       await notify({
         req,
@@ -214,8 +314,6 @@ exports.updateTask = asyncHandler(async (req, res) => {
       });
       emitToUser(req, populated.assignee._id, 'notification', { type: 'task_updated', task: populated });
     }
-
-    // notify project owner
     if (populated.project && populated.project.owner) {
       const ownerId = populated.project.owner;
       await notify({
@@ -230,16 +328,10 @@ exports.updateTask = asyncHandler(async (req, res) => {
       emitToUser(req, ownerId, 'notification', { type: 'task_updated', task: populated });
     }
   }
-
-  // Emit update to project room for real-time UI update
   emitToProject(req, populated.project._id, 'taskUpdated', populated);
 
   res.json(populated);
 });
-
-/**
- * DELETE /api/tasks/:id
- */
 exports.deleteTask = asyncHandler(async (req, res) => {
   const { id } = req.params;
   if (!mongoose.isValidObjectId(id)) { res.status(400); throw new Error('Invalid task id'); }
@@ -247,16 +339,21 @@ exports.deleteTask = asyncHandler(async (req, res) => {
   const task = await Task.findById(id).populate('project', 'owner title');
   if (!task) { res.status(404); throw new Error('Task not found'); }
 
+  if (!task.project || !task.project.owner) {
+    res.status(404); throw new Error('Project not found');
+  }
+
   if (!task.project.owner.equals(req.user._id) && req.user.role !== 'admin') {
     res.status(403); throw new Error('Only project owner or admin can delete tasks');
   }
 
-  await task.remove();
+  // Cascade delete: remove all comments associated with this task
+  await Comment.deleteMany({ task: id });
 
-  // emit to project that a task was deleted
+  await task.deleteOne();
+
   emitToProject(req, task.project._id, 'taskDeleted', { taskId: id });
 
-  // Optionally notify assignee that task was removed
   if (task.assignee) {
     await notify({
       req,

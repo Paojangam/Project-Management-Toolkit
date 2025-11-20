@@ -26,28 +26,58 @@
   margin-bottom: 16px;
 }
 
+/* Project description */
+.project-description {
+  color: #666;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
 /* Inline task form */
 .inline-form {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 24px;
+  flex-wrap: wrap;
 }
 
-.inline-form input {
-  flex: 1;
+.task-input-title {
+  flex: 2;
+  min-width: 200px;
   padding: 10px 14px;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 14px;
 }
 
-.inline-form input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+.task-input-description {
+  flex: 2;
+  min-width: 200px;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
 }
 
-.inline-form button {
+.task-input-priority {
+  flex: 1;
+  min-width: 120px;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.task-input-due-date {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.task-submit-btn {
   padding: 10px 18px;
   background: #2563eb;
   color: #fff;
@@ -56,10 +86,18 @@
   font-size: 14px;
   cursor: pointer;
   transition: background 0.2s;
+  white-space: nowrap;
 }
 
-.inline-form button:hover {
+.task-submit-btn:hover {
   background: #1e4bb8;
+}
+
+.inline-form input:focus,
+.inline-form select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
 /* Task list */
@@ -83,28 +121,283 @@
   background: #f5f7ff;
 }
 
-/* Task checkbox and title */
-.list-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: #2563eb;
-  margin-right: 12px;
+/* Task main content */
+.task-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.status-toggle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  background: #fff;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+  flex-shrink: 0;
 }
 
-.list-item span {
+.status-toggle.status-todo {
+  border-color: #94a3b8;
+  color: #94a3b8;
+}
+
+.status-toggle.status-inprogress {
+  border-color: #2563eb;
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.status-toggle.status-done {
+  border-color: #10b981;
+  background: #d1fae5;
+  color: #10b981;
+}
+
+.status-toggle:hover {
+  transform: scale(1.1);
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.task-title {
   font-size: 16px;
+  font-weight: 500;
 }
 
-.list-item span.done {
+.task-title.done {
   text-decoration: line-through;
   color: #999;
 }
 
-/* Assignee info */
-.list-item .muted.small {
+.task-description {
+  font-size: 13px;
+  color: #666;
+}
+
+.task-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.priority-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.priority-low {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.priority-medium {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.priority-high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.due-date {
   font-size: 12px;
-  color: #555;
+}
+
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.assignee-info {
+  font-size: 12px;
+  color: #666;
+}
+
+.delete-btn {
+  padding: 6px 12px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.delete-btn:hover {
+  background: #b91c1c;
+}
+
+/* Comments section */
+.comments-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.comments-header {
+  margin-bottom: 12px;
+}
+
+.comments-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+.comment-err {
+  color: #dc2626;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.comment-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.comment-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.comment-submit-btn {
+  align-self: flex-start;
+  padding: 6px 16px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.comment-submit-btn:hover:not(:disabled) {
+  background: #1e4bb8;
+}
+
+.comment-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.no-comments {
+  color: #9ca3af;
+  font-size: 13px;
+  font-style: italic;
+  padding: 12px;
+  text-align: center;
+}
+
+.comment-item {
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.comment-author-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.comment-date {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.comment-delete-btn {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.comment-delete-btn:hover {
+  background: #fee2e2;
+}
+
+.comment-text {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.task-with-comments {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.task-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* Responsive tweaks */
@@ -115,5 +408,15 @@
 
   .inline-form button {
     width: 100%;
+  }
+
+  .task-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .task-actions {
+    justify-content: flex-start;
   }
 }

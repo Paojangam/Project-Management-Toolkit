@@ -28,13 +28,13 @@ export default function Register() {
       {msg && <div className="info">{msg}</div>}
       <form onSubmit={submit}>
         <label>Name</label>
-        <input
+        <input placeholder='Firstname Lastname'
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
         <label>Email</label>
-        <input
+        <input placeholder="example@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -47,13 +47,13 @@ export default function Register() {
           required
         />
         <button className="primary" type="submit">
-          Register
+          Sign Up
         </button>
       </form>
       <p>
         Already have an account?{' '}
         <button className="link-btn" onClick={() => navigate('/login')}>
-          Login
+          Sign In
         </button>
       </p>
     </div>

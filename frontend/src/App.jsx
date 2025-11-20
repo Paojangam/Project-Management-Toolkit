@@ -24,9 +24,9 @@ function RequireAuth({ user, children }) {
 
 function Placeholder({ title }) {
   return (
-    <div className="card" style={{ padding: 24 }}>
+    <div className="card placeholder-card">
       <h2>{title}</h2>
-      <p style={{ color: "#6b7280" }}>{title} page is not implemented yet.</p>
+      <p className="placeholder-text">{title} page is not implemented yet.</p>
     </div>
   );
 }
