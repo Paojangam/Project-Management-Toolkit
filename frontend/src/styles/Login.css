@@ -2,9 +2,10 @@
   max-width: 400px;
   margin: 60px auto;
   padding: 32px;
-  border-radius: var(--radius);
+  border-radius: 5px;
   box-shadow: var(--shadow);
   background: var(--card);
+  margin-top: 10px;
 }
 
 .auth-card h2 {
@@ -16,21 +17,22 @@
   background: #ffecec;
   color: #b00;
   padding: 10px;
-  border-radius: var(--radius);
-  margin-bottom: 14px;
+  border-radius: 5px;
+  margin-bottom: 5px;
 }
 
 .auth-card .info {
   background: #eef7ff;
   color: #035;
   padding: 10px;
-  border-radius: var(--radius);
+  border-radius: 5px;
   margin-bottom: 14px;
 }
 
 .auth-card button {
   width: 100%;
   margin-top: 10px;
+  border-radius: 5px; /* keeps buttons consistent with card */
 }
 
 .auth-divider {
@@ -39,6 +41,7 @@
   color: #666;
   font-weight: 500;
 }
+
 .google-btn-wrap {
   width: 100%;
   display: flex;
@@ -49,5 +52,28 @@
 /* Force the iframe (Google renders an iframe internally) to expand */
 .google-btn-wrap iframe {
   width: 100% !important;
-  border-radius: 6px !important;
+  border-radius: 5px !important;
+}
+.auth-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.auth-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }

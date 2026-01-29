@@ -121,7 +121,7 @@
 /* keyboard focus */
 .nav-item:focus {
   box-shadow: 0 0 0 3px rgba(47,111,247,0.08);
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
 /* footer */
@@ -140,7 +140,7 @@
   font-size: 13px;
   cursor: pointer;
   padding: 8px;
-  border-radius: 6px;
+  border-radius: 3px;
 }
 .sidebar-footer .ghost:hover { color: var(--text); background: var(--hover-bg); }
 

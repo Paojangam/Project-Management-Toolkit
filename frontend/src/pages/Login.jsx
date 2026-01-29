@@ -64,23 +64,29 @@ function Login({ onLoginSuccess }) {
       <form onSubmit={submit}>
         <label>Email</label>
         <input
-          placeholder="example@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <label>Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+  className="auth-input"
+  type="email"
+  placeholder="example@email.com"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  required
+/>
+
+<label>Password</label>
+
+<input
+  className="auth-input"
+  type="password"
+  placeholder="Enter your password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  required
+/>
+
         <button className="primary" type="submit">Sign In</button>
       </form>
 
       {/* Divider */}
-      <div className="auth-divider">OR</div>
 
       {/* Google Sign-In button */}
       <div className="google-btn-wrap">

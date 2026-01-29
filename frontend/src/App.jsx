@@ -15,10 +15,11 @@ import Homepage from "./pages/Homepage";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import ProjectDetail from "./pages/ProjectDetail";
+import LandingPage from "./pages/LandingPage";
 import { api } from "./api";
 
 function RequireAuth({ user, children }) {
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/landing" replace />;
   return children;
 }
 
@@ -37,6 +38,8 @@ function AppRoutes({ user, onLogout, onLoginSuccess }) {
       {/* Public routes (no chrome) */}
       <Route path="/login" element={<Login onLoginSuccess={onLoginSuccess} />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/landing" element={<LandingPage />} />
+
 
       {/* All routes inside Layout show Navbar + Sidebar */}
       <Route element={<Layout user={user} onLogout={onLogout} />}>

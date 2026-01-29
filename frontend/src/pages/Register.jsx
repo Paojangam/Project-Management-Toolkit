@@ -59,6 +59,7 @@ function Register() {
       <form onSubmit={submit}>
         <label>Name</label>
         <input
+          className="auth-input"
           placeholder="Firstname Lastname"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -67,6 +68,7 @@ function Register() {
 
         <label>Email</label>
         <input
+          className="auth-input"
           placeholder="example@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -75,6 +77,7 @@ function Register() {
 
         <label>Password</label>
         <input
+          className="auth-input"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
